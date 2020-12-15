@@ -265,7 +265,7 @@ kubectl get deployment demodeploy -o yaml
 kubectl get rs
 kubectl get pods -o wide
 kubectl port-forward <pod name> 8090:8080
-curl localhost:8080
+curl localhost:8090
 ```
 
 ---
