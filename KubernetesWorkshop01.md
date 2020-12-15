@@ -40,7 +40,7 @@ git clone git@github.com:benmathews/KubernetesWorkshop.git
 Set up the the configuration that will connect kubectl to your cluster with
 
 ``` bash
-# STOP!!!! Backup your existing config first
+cp ~/.kube/config ~/.kube/config.bak
 cp <location of repo>/k8sconfig ~/.kube/config
 ```
 
