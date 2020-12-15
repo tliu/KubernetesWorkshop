@@ -260,11 +260,12 @@ spec:
 ``` bash
 kubectl create deployment demodeploy --image=localhost:32000/<your name>/demowebapp:v1.0.0
 kubectl get deployment
-kubectl describe deloyment demodeploy
+kubectl describe deployment demodeploy
 kubectl get deployment demodeploy -o yaml
 kubectl get rs
 kubectl get pods -o wide
-curl <ip>:8080
+kubectl port-forward <pod name> 8090:8080
+curl localhost:8080
 ```
 
 ---
@@ -303,10 +304,11 @@ spec:
 # Service practice
 
 ``` bash
-kubectl expose deployment demodeploy --target-port=8080 --port=80 --type=NodePort
+kubectl expose deployment demodeploy --target-port=8080 --port=80
 kubectl get service demodeploy
 kubectl describe service demodeploy
-curl <node ip>:<allocated port> #note no 8080
+kubectl port-forward svc/demodeploy 8090:80
+curl localhost:8090
 ```
 
 ---
@@ -316,7 +318,7 @@ curl <node ip>:<allocated port> #note no 8080
 ``` bash
 kubectl scale deployment demodeploy --replicas=3
 kubectl get pods -l app=demodeploy
-curl <node ip>:<allocated port> #note served from multiple ips
+curl localhost:8090
 ```
 
 ---
