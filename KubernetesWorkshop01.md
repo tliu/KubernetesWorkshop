@@ -12,93 +12,22 @@ backgroundColor: #B9C9A9
 
 https://github.com/benmathews/KubernetesWorkshop
 
-<!-- I'm going to experiment with using teams status to know when I can move on. Set to busy when working on a problem and available when ready to move on.
--->
-
 ---
 
 # Prerequisites
 
-## Kubernetes Cluster
+To complete this workshop you need some setup first.
 
-To complete this workshop you need a working kubernetes cluster and registry running on your laptop. Your options include
+- Install [stern](https://github.com/wercker/stern).
+- Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/). And although not required, it is very helpful to have autocomplete configured.
 
-- [Minikube](https://minikube.sigs.k8s.io/docs/) - mature, but perhaps a little heavy. Officially supported
-- [MicroK8S](https://microk8s.io/) - lightweight, from Canonical
-- [K3S](https://k3s.io/) - super lightweight, from Rancher
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) - built into Windows and Mac docker install
-
-I strongly recommend MicroK8S (and some instructions will be MicroK8S specific). But any of these should work.
-
----
-
-# Prerequisites
-
-## Kubectl
-
-You also need [kubectl installed](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-
-And although not required, it is very helpful to have autocomplete configured.
-
-```
+``` bash
 # bash-completion package should be installed first.
 source <(kubectl completion bash) 
 echo "source <(kubectl completion bash)" >> ~/.bashrc 
 ```
 
----
-
-# Prerequisites
-
-## Configuration
-
-Set up the the configuration that will connect kubectl to your cluster with 
-
-```
-# backup your existing config first
-microk8s config > ~/.kube/config
-```
-
-Before attending the workshop, you should be able to run this command and get a response.
-
-```
-$ kubectl version
-Client Version: version.Info{Major:"1", Minor:"18", ...
-Server Version: version.Info{Major:"1", Minor:"17", ...
-```
-
----
-
-# Prerequisites
-
-## Registration
-
-Set up a registry 
-
-```
-microk8s enable registry
-```
-
-Add to /etc/docker/daemon.json
-```
-{
-  "insecure-registries" : ["localhost:32000"]
-}
-```
-
-```
-sudo systemctl restart docker
-```
-
----
-
-# Prerequisites
-
-## Other tools
-
-- Install [stern](https://github.com/wercker/stern).
-
-Clone this repo to get a sample app and container
+Clone this repo to get a sample app, Dockerfile, and kube config.
 
 ``` bash
 git clone git@github.com:benmathews/KubernetesWorkshop.git
@@ -106,13 +35,69 @@ git clone git@github.com:benmathews/KubernetesWorkshop.git
 
 ---
 
+# Prerequisites - Kubectl Config
+
+Set up the the configuration that will connect kubectl to your cluster with
+
+``` bash
+# STOP!!!! Backup your existing config first
+cp <location of repo>/k8sconfig ~/.kube/config
+```
+
+Before attending the workshop, you should be able to run this command and get a response.
+
+``` bash
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"18...
+Server Version: version.Info{Major:"1", Minor:"19...
+```
+
+---
+
+# Prerequisites - Registry Config Linux
+
+Enable access to the registry on Linux
+
+Add to /etc/docker/daemon.json
+
+``` json
+{
+  "insecure-registries" : ["10.1.31.199:32000"]
+}
+```
+
+``` bash
+sudo systemctl restart docker
+```
+
+---
+
+# Prerequisites - Registry Config MacOS
+
+Add this to the Docker configuration
+
+``` json
+{
+  "insecure-registries" : ["10.1.31.199:32000"]
+}
+```
+
+Add the above json to the `Docker Engine` configuration in `Preferences`
+
+- From the Mac status bar, go to `Docker | Preferences`
+- Navigate to the `Docker Engine` section
+- Integrate the above json into the displayed json
+- Click `Apply & Restart`
+
+---
+
 # What is Kubernetes
 
-An open-source system for automating 
+An open-source system for automating
 
-* deployment, 
-* scaling, 
-* and management 
+* deployment,
+* scaling,
+* and management
 
 of containerized applications.
 
@@ -176,10 +161,11 @@ kubectl config set-context --current --namespace=<namespace name>
 ``` bash
 kubectl run demopod --image=alpine -- sleep 1000000
 kubectl get pod demopod
+kubectl get pod demopod -o yaml
 kubectl describe pod demopod
 ```
 
-Shell into the pod and do "stuff".
+Shell into the pod and run some commands. Observe that you are in a container.
 
 ``` bash
 kubectl exec -it demopod sh
@@ -197,38 +183,31 @@ kubectl run demopod --image=alpine --labels='firstpod=true,effort=k8sworkshop' \
 
 # Sample project
 
-Clone presentation and build sample image
+Build sample image
 
 ``` bash
-git clone git@github.com:benmathews/KubernetesWorkshop.git
 cd KubernetesWorkshop/demowebapp/
 docker build . -t demowebapp:v1.0.0
 ```
 
 ---
+
 # Registry
 
 Push your image into the local registry
 
-```
-docker build . -t localhost:32000/demowebapp:v1.0.0
+``` bash
+docker build . -t 10.1.31.199:32000/<your name>/demowebapp:v1.0.0
 # or
-docker tag demowebapp:v1.0.0 localhost:32000/demowebapp:v1.0.0
+docker tag demowebapp:v1.0.0 10.1.31.199:32000/<your name>/demowebapp:v1.0.0
 
-docker push localhost:32000/demowebapp:v1.0.0
+docker push 10.1.31.199:32000/<your name>/demowebapp:v1.0.0
 ```
 
 ---
 ![bg contain](KubernetesWorkloads.png)
 
 <!-- credit https://www.reddit.com/r/kubernetes/comments/k26je7/overview_of_builtin_kubernetes_workload_resources/-->
-
----
-
-
-# ReplicaSet
-
-Maintain a stable set of replica Pods running at any given time. As such, it is often used to guarantee the availability of a specified number of identical Pods.
 
 ---
 
@@ -243,7 +222,6 @@ Deployment use cases:
 - Scale up or down the number of pod replicas.
 - Pause and resume rollout
 - Monitor rollout status
-- Undo deployment change
 
 ---
 
@@ -268,18 +246,19 @@ spec:
         app: demodeploy
     spec:
       containers:
-      - image: localhost:32000/test:latest
+      - image: localhost:32000/<your name>/test:latest
         name: test
 ```
+
 ---
 
-# Deployment practice 
+# Deployment practice
 
- - Create a deployment.
- - Examine it and the artifacts it creates
+- Create a deployment.
+- Examine it and the artifacts it creates
 
 ``` bash
-kubectl create deployment demodeploy --image=localhost:32000/demowebapp:v1.0.0
+kubectl create deployment demodeploy --image=localhost:32000/<your name>/demowebapp:v1.0.0
 kubectl get deployment
 kubectl describe deloyment demodeploy
 kubectl get deployment demodeploy -o yaml
@@ -289,7 +268,8 @@ curl <ip>:8080
 ```
 
 ---
-# Service 
+
+# Service
 
 An abstract way to expose an application running on a set of Pods as a network service.
 
@@ -320,7 +300,7 @@ spec:
 
 ---
 
-# Service practice 
+# Service practice
 
 ``` bash
 kubectl expose deployment demodeploy --target-port=8080 --port=80 --type=NodePort
@@ -328,7 +308,9 @@ kubectl get service demodeploy
 kubectl describe service demodeploy
 curl <node ip>:<allocated port> #note no 8080
 ```
+
 ---
+
 # Scale Deployment
 
 ``` bash
@@ -338,6 +320,7 @@ curl <node ip>:<allocated port> #note served from multiple ips
 ```
 
 ---
+
 # Labels and selectors
 
 - Key/value pairs that are attached to objects
@@ -381,6 +364,7 @@ View logs with `kubectl log` or [stern](https://github.com/wercker/stern).
 kubectl logs -f <pod name>
 stern -l app=demodeploy
 ```
+
 ---
 
 # Kubectl edit
@@ -396,10 +380,10 @@ kubectl edit deploy demodeploy
 ![bg](questions.jpg)
 
 ---
+
 # Assignment
 
 - Modify the sample node program to return "Hello Universe".
 - Create a new version of the docker image and push it to your local registry.
 - Create a new deployment to serve the new version.
 - Modify the service so that it routes traffic to both deployments
-

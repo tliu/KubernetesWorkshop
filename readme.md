@@ -2,73 +2,74 @@
 
 ## Prerequisites
 
-### Kubernetes Cluster
+To complete this workshop you need some setup first.
 
-To complete this workshop you need a working kubernetes cluster and registry running on your laptop. Your options include
+- Install [stern](https://github.com/wercker/stern).
+- Install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/). And although not required, it is very helpful to have autocomplete configured.
 
-- [Minikube](https://minikube.sigs.k8s.io/docs/) - mature, but perhaps a little heavy. Officially supported
-- [MicroK8S](https://microk8s.io/) - lightweight, from Canonical
-- [K3S](https://k3s.io/) - super lightweight, from Rancher
-- [Docker Desktop](https://www.docker.com/products/docker-desktop) - built into Windows and Mac docker install
-
-I strongly recommend MicroK8S (and some instructions will be MicroK8S specific). But any of these should work.
-
-### Kubectl
-
-You also need [kubectl installed](https://kubernetes.io/docs/tasks/tools/install-kubectl/).
-
-And although not required, it is very helpful to have autocomplete configured.
-
-```
+``` bash
 # bash-completion package should be installed first.
 source <(kubectl completion bash) 
 echo "source <(kubectl completion bash)" >> ~/.bashrc 
 ```
 
-### Configuration
-
-Set up the the configuration that will connect kubectl to your cluster with 
-
-```
-# backup your existing config first
-microk8s config > ~/.kube/config
-```
-
-Before attending the workshop, you should be able to run this command and get a response.
-
-```
-$ kubectl version
-Client Version: version.Info{Major:"1", Minor:"18", ...
-Server Version: version.Info{Major:"1", Minor:"17", ...
-```
-### Registration
-
-Set up a registry 
-
-```
-microk8s enable registry
-```
-
-Add to /etc/docker/daemon.json
-```
-{
-  "insecure-registries" : ["localhost:32000"]
-}
-```
-
-```
-sudo systemctl restart docker
-```
-
-### Other tools
-
-- Install [stern](https://github.com/wercker/stern).
-
-Clone this repo to get a sample app and container
+Clone this repo to get a sample app, Dockerfile, and kube config.
 
 ``` bash
 git clone git@github.com:benmathews/KubernetesWorkshop.git
 ```
+
+### Kubectl Config
+
+Set up the the configuration that will connect kubectl to your cluster with
+
+``` bash
+# STOP!!!! Backup your existing config first
+cp <location of repo>/k8sconfig ~/.kube/config
+```
+
+Before attending the workshop, you should be able to run this command and get a response.
+
+``` bash
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"18...
+Server Version: version.Info{Major:"1", Minor:"19...
+```
+
+### Registry Config
+
+#### Linux
+
+Enable access to the registry on Linux
+
+Add to /etc/docker/daemon.json
+
+``` json
+{
+  "insecure-registries" : ["10.1.31.199:32000"]
+}
+```
+
+``` bash
+sudo systemctl restart docker
+```
+
+#### MacOS
+
+Add this to the Docker configuration
+
+``` json
+{
+  "insecure-registries" : ["10.1.31.199:32000"]
+}
+```
+
+Add the above json to the `Docker Engine` configuration in `Preferences`
+
+- From the Mac status bar, go to `Docker | Preferences`
+- Navigate to the `Docker Engine` section
+- Integrate the above json into the displayed json
+- Click `Apply & Restart`
 
 ## Marp
 
