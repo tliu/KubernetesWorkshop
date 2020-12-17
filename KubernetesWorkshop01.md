@@ -262,7 +262,7 @@ kubectl create deployment demodeploy --image=localhost:32000/<your name>/demoweb
 kubectl get deployment
 kubectl describe deployment demodeploy
 kubectl get deployment demodeploy -o yaml
-kubectl get rs
+kubectl get replicaset
 kubectl get pods -o wide
 kubectl port-forward <pod name> 8090:8080
 curl localhost:8090
@@ -306,6 +306,7 @@ spec:
 ``` bash
 kubectl expose deployment demodeploy --target-port=8080 --port=80
 kubectl get service demodeploy
+kubectl get service demodeploy -o yaml
 kubectl describe service demodeploy
 kubectl port-forward svc/demodeploy 8090:80
 curl localhost:8090
@@ -318,7 +319,7 @@ curl localhost:8090
 ``` bash
 kubectl scale deployment demodeploy --replicas=3
 kubectl get pods -l app=demodeploy
-curl localhost:8090
+kubectl describe service demodeploy # observe multiple endpoints
 ```
 
 ---
