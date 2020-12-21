@@ -1,0 +1,37 @@
+apiVersion: v1
+items:
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: demodeploy
+    name: demodeploy
+  spec:
+    replicas: 2
+    selector:
+      matchLabels:
+        app: demodeploy
+    template:
+      metadata:
+        labels:
+          app: demodeploy
+      spec:
+        containers:
+        - image: localhost:32000/demowebapp:v1.2.1
+          name: demowebapp
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: demodeploy
+    name: demodeploy
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: demodeploy
+    sessionAffinity: None
+    type: ClusterIP
+kind: List

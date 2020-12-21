@@ -8,6 +8,7 @@ contexts:
 - context:
     cluster: workshop-cluster
     user: microk8s
+    namespace: changeme
   name: workshop
 current-context: workshop
 kind: Config

@@ -1,0 +1,16 @@
+@startuml
+skinparam componentStyle rectangle
+scale 450 height
+
+  component Pod1
+  component Pod2
+  component PodN
+
+component Service
+note right: app=foo
+
+Service --> Pod1
+Service --> Pod2
+Service --> PodN
+
+@enduml

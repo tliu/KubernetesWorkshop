@@ -1,0 +1,29 @@
+@startuml
+skinparam componentStyle rectangle
+scale 450 height
+
+component User
+component LoadBalancer
+component "Node1" {
+component Service1
+component Service2
+[Ingress Service] as Ingress1
+}
+
+component "Node2" {
+[Ingress Service] as Ingress2
+}
+
+component "NodeN" {
+[Ingress Service] as IngressN
+
+}
+Ingress1 --> Service1
+Ingress1 --> Service2
+
+User --> LoadBalancer
+LoadBalancer --> Ingress1
+LoadBalancer --> Ingress2
+LoadBalancer --> IngressN
+
+@enduml

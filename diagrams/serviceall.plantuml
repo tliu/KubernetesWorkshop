@@ -1,0 +1,24 @@
+@startuml
+skinparam componentStyle rectangle
+scale 450 height
+
+component "Node1" {
+component Service1
+component Service2
+component Pod1
+}
+
+component "Node2" {
+  component Pod2
+}
+
+component "NodeN" {
+component PodN
+
+}
+Service1 --> Pod1
+Service1 --> Pod2
+Service1 --> PodN
+Service2 <--> Service1
+@enduml
+

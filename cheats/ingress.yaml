@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: demodeploy
+spec:
+  rules:
+  - host: workshop-k8s
+    http:
+      paths:
+      - backend:
+          serviceName: demodeploy
+          servicePort: 80
+        path: /sample/

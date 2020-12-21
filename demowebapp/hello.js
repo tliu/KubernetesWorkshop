@@ -8,9 +8,9 @@ const HOST = '0.0.0.0';
 
 // App
 const app = express();
-app.get('/', (req, res) => {
+app.get('/\*', (req, res) => {
   var ip = require("ip");
-  res.send('Hello World from ' + ip.address());
+  res.send('Hello World from ' + ip.address() + ' and your friends at ' + process.env.FRIENDS );
   console.log('handled request');
 });
 

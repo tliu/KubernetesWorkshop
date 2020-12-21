@@ -1,0 +1,10 @@
+@startuml
+skinparam componentStyle rectangle
+scale 450 height
+
+component Deployment {
+  component Pod1
+  component Pod2
+  component PodN
+}
+@enduml
