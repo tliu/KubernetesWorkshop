@@ -6,7 +6,7 @@ footer: 'Ben Mathews - January 2021'
 backgroundColor: #B9C9A9
 ---
 
-# Kubernetes Workshop part 1
+# Kubernetes Workshop part 2
 
 ## The basics from a users perspective
 
@@ -213,49 +213,146 @@ metadata:
 data:
   foo: YmFy
 ```
+
 ---
-Explain the ability to use as environmental variable, runtime variable, volume.
-Explain volumes
+
+# Using Configmaps and Secrets
+
+- Inside a container command and args
+- Environment variables for a container
+- Add a file in read-only volume, for the application to read
+
 ---
- -Add a configmap and secret and reference them in the deployment
- -Use an environmental variable in the demo app
- -Add a liveness probe to the deployment
-	 -Observe it failing w/ k describe
-	 -Implement the probe and see it rollout
 
- -Delete  the deployment, service, ingress, and namespace
-	 -Confirm they are gone
-	resources request/limits
+# Configmap usage example 
 
+``` yaml
+kind: Pod
+spec:
+  containers:
+    - name: demo
+      image: alpine
+      command: ["sleep", "$(SLEEP_TIME)"]
+      env:
+        - name: SLEEP_TIME
+          valueFrom:
+            configMapKeyRef:
+              name: volumeName
+              key: sleepTime
+      volumeMounts:
+      - name: volumeName
+        mountPath: "/config"
+        readOnly: true
+  volumes:
+    - name: volumeName
+      configMap:
+        name: configurationMapName
+        items:
+        - key: "game.properties"
+          path: "game.properties"
+    - name: volumeNameForSecret
+      secret:
+        name: secretName
+```
 
-https://www.digitalocean.com/community/tutorials/webinar-series-a-closer-look-at-kubernetes
-https://kubernetes.io/docs/tutorials/kubernetes-basics/
+---
 
-./pasted_image.png
-https://www.reddit.com/r/kubernetes/comments/k8kqdr/overview_of_kubernetes_architecture/
+# Configmap and secret practice
 
-./pasted_image001.png
-https://www.reddit.com/r/kubernetes/comments/k26je7/overview_of_builtin_kubernetes_workload_resources/
+ - Add a configmap and secret and reference them in the deployment
+ - Use an environmental variable in the demo app
+   - Use the `10.1.31.199:32000/demowebapp:v1.2.2` image which uses a FRIENDS env variable
 
+---
 
- -https://www.digitalocean.com/community/tutorials/how-to-create-a-kubernetes-cluster-using-kubeadm-on-ubuntu-18-04#step-7-%E2%80%94-running-an-application-on-the-cluster
+# Pod Phase
 
- Kubectl Debug Graduates to Beta
-The kubectl alpha debug features graduates to beta in 1.20, becoming kubectl debug. The feature provides support for common debugging workflows directly from kubectl. Troubleshooting scenarios supported in this release of kubectl include:
+`kubect get pod` 
 
-Troubleshoot workloads that crash on startup by creating a copy of the pod that uses a different container image or command.
-Troubleshoot distroless containers by adding a new container with debugging tools, either in a new copy of the pod or using an ephemeral container. (Ephemeral containers are an alpha feature that are not enabled by default.)
-Troubleshoot on a node by creating a container running in the host namespaces and with access to the host’s filesystem. Note that as a new built-in command, kubectl debug takes priority over any kubectl plugin named “debug”. You must rename the affected plugin.
+- Pending
+- Running
+- Succeeded
+- Failed
+- Unknown
+
+---
+
+# Container State
+
+`kubectl describe pod <pod name>`
+
+- Waiting
+- Running
+- Terminated
+
+---
+
+# Pod Status
+
+1. PodScheduled
+1. ContainersReady
+1. Initialized
+1. Ready
+
+---
+
+# Container Probes
+
+3 types
+
+- Execution
+- TCP Socket
+- HTTP Get
+
+---
+# Container Probes
+
+3 outcomes
+
+- Success
+- Failure
+- Unknown
+
+---
+# Container Probes
+
+3 probe types
+
+- liveness
+- readiness
+- startup
+
+---
+
+# Probe example
+
+``` yaml
+apiVersion: apps/v1
+kind: Deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: demowebapp
+        image: ....
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /foo
+            port: 80
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+```
+
+---
+
+# Probe practice
+
+ -Add a failing liveness probe to the deployment
+	 -Observe it failing w/ `kubectl describe`
+	 -Correct the probe and see it rollout
 
 ---
 
 ![bg](questions.jpg)
-
----
-
-# Assignment
-
-- Modify the sample node program to return "Hello Universe".
-- Create a new version of the docker image and push it to your local registry.
-- Create a new deployment to serve the new version.
-- Modify the service so that it routes traffic to both deployments
